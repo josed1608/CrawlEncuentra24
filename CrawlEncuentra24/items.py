@@ -9,6 +9,9 @@ import scrapy
 
 
 class Crawlencuentra24Item(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    titulo = scrapy.Field()
+    ubicacion = scrapy.Field()
+    precio = scrapy.Field()
+    metrosCuadrados = scrapy.Field()
+    habitaciones = scrapy.Field()
+    descripcion = scrapy.Field()
