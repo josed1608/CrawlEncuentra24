@@ -14,6 +14,22 @@ BOT_NAME = 'CrawlEncuentra24'
 SPIDER_MODULES = ['CrawlEncuentra24.spiders']
 NEWSPIDER_MODULE = 'CrawlEncuentra24.spiders'
 
+SPLASH_URL = 'http://localhost:8050'
+
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
+
+DOWNLOADER_MIDDLEWARES = {
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+}
+
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'CrawlEncuentra24 (+http://www.yourdomain.com)'
