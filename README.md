@@ -11,8 +11,8 @@ Crawler for obtaining pricing information from encuentra24's property selling
   You must also [install Splash and start the docker image](https://splash.readthedocs.io/en/latest/install.html)
   
 ## How to run
-To tun the crawl for the Encuentra24 website, you can run  th following command:
+To run the crawl for the Encuentra24 website, use the following command:
 
 `scrapy crawl CrawlEncuentra24 -o info.csv`
 
-This will create a csv file called info with the result of the crawl. You can change the format to JSON or XML by simply changing the extension of the filename (which is also customizable)
+This will create a csv file called `info.csv` with the result of the crawl. You can change the format to JSON or XML by simply changing the extension of the filename (which is also customizable)
