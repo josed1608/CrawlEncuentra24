@@ -1,4 +1,5 @@
 import scrapy
+from scrapy_splash import SplashRequest
 
 from ..items import Crawlencuentra24Item
 
@@ -27,5 +28,9 @@ class Ecncuentra24Spider(scrapy.Spider):
             anuncios['metrosCuadrados'] = anuncio.css(".icon-area+ .value::text").extract()
             anuncios['habitaciones'] = anuncio.css(".icon-category-home+ .value::text").extract()
             anuncios['descripcion'] = anuncio.css(".ann-box-desc::text").extract()
+
+            linkAnuncio = anuncio.css(".ann-box-title::attr(href)").get()
+
+            yield SplashRequest()
 
             yield anuncios
