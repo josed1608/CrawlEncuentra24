@@ -15,3 +15,4 @@ class Crawlencuentra24Item(scrapy.Item):
     metrosCuadrados = scrapy.Field()
     habitaciones = scrapy.Field()
     descripcion = scrapy.Field()
+    coordenadas = scrapy.Field()
