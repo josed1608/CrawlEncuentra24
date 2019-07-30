@@ -16,3 +16,4 @@ class Crawlencuentra24Item(scrapy.Item):
     habitaciones = scrapy.Field()
     descripcion = scrapy.Field()
     coordenadas = scrapy.Field()
+    bannos = scrapy.Field()
