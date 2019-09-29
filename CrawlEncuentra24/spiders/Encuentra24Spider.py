@@ -8,10 +8,11 @@ from ..items import Crawlencuentra24Item
 
 class Ecncuentra24Spider(scrapy.Spider):
     name = 'Encuentra24Spider'
-    start_urls = ['https://www.encuentra24.com/costa-rica-en/searchresult/real-estate-for-sale#search=f_currency.crc&regionslug=san-jose-san-jose-capital&page=143']
+    start_urls = ['https://www.encuentra24.com/costa-rica-en/searchresult/real-estate-for-sale.1?regionslug=san-jose-san-jose-capital&q=f_currency.crc']
     BASE_URL = 'https://www.encuentra24.com'
     reg_ex_coordenadas = re.compile(r"q=-?\d+\.\d+,-?\d+\.\d+")
     archivo = True
+    first_page = True
 
     lua_script_paginar = '''
 function main(splash, args)
@@ -57,7 +58,6 @@ end'''
             item_anuncio['precio'] = anuncio.css(".ann-price-2nd div::text").extract()
             item_anuncio['metrosCuadrados'] = anuncio.css(".icon-area+ .value::text").extract()
             item_anuncio['habitaciones'] = anuncio.css(".icon-category-home+ .value::text").extract()
-            item_anuncio['descripcion'] = anuncio.css(".ann-box-desc::text").extract()
 
             link_anuncio = anuncio.css(".ann-box-title::attr(href)").get()
 
@@ -65,7 +65,9 @@ end'''
 
         flechas_sig_pag = response.css("nav li.arrow a::attr(href)")
         # Hay dos flechas arriba y dos abajo, 4 en total
-        if len(flechas_sig_pag) == 4:
+        if len(flechas_sig_pag) == 4 or self.first_page:
+            if self.first_page:
+                self.first_page = False
             link_sig_pag = self.crear_sig_url(response.url)
             yield SplashRequest(url=link_sig_pag, callback=self.parse, endpoint='execute', args={'lua_source': self.lua_script_paginar})
         else:
@@ -78,18 +80,18 @@ end'''
         item = response.meta.get('anuncio')
         item['coordenadas'] = match.group()[2:] if match is not None else None
         item['bannos'] = response.css('.icon-bathroom~ .info-value::text').extract()
+        item['descripcion'] = response.css('p::text').extract()
+        item['telefono'] = response.css('span.phone.icon.icon-call::text')[0].extract()
         yield item
 
     def crear_sig_url(self, url_viejo):
-        igual_encontrado = False
-        i = -1
-        while not igual_encontrado:
-            if url_viejo[i] == "=":
-                igual_encontrado = True
-            else:
-                i -= 1
+        reg_ex_pagina= re.compile(r"\.\d+\?")
+        match = reg_ex_pagina.search(url_viejo)
 
-        indice_numero = len(url_viejo) + i + 1
-        pagina_nueva = int(url_viejo[indice_numero:]) + 1
+        pagina_nueva = int(match.group()[1:-1]) + 1
+        inicio_num = match.span()[0]
+        fin_num = match.span()[1]
+        sig_url = url_viejo[:inicio_num+1] + str(pagina_nueva) + url_viejo[fin_num-1:]
+        print(sig_url)
 
-        return url_viejo[:indice_numero] + str(pagina_nueva)
+        return sig_url
