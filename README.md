@@ -1,18 +1,18 @@
 # CrawlEncuentra24
-Crawler for obtaining pricing information from encuentra24's property selling
+Crawler para obtener información de los anuncios de propiedades en Encuentra24.
 
-## How to setup the enviroment
-  It is recommended to use a venv for the project. On this venv install Scrapy and ScrapyJs with the following commands:
-  
+## Como setear el ambiente de desarrollo
+El proyecto utiliza la librería Scrapy de Python para realizar el crawling. Se recomienda utilizat venv para setear el ambiente del proyeto. Dentro del virtual environment se deben instalar Scrapy y ScrapySplash con los siguientes comandos: 
+
   `pip install scrapy`
   
   `pip install scrapy-splash`
 
-  You must also [install Splash and start the docker image](https://splash.readthedocs.io/en/latest/install.html)
+También se debe instalar Splash e iniciar su imagen de docker [siguiendo estas instrucciones](https://splash.readthedocs.io/en/latest/install.html)
   
-## How to run
-To run the crawl for the Encuentra24 website, use the following command:
+## Cómo correr el crawler
+Para correr el crawler se debe correr el comando:
 
-`scrapy crawl CrawlEncuentra24 -o info.csv`
+`scrapy crawl Encuentra24Spider -o info.csv`
 
-This will create a csv file called `info.csv` with the result of the crawl. You can change the format to JSON or XML by simply changing the extension of the filename (which is also customizable)
+El resultado de la corrida será un archivo de nombre `info.csv` que contendrá la información obtenida de Encuentra24

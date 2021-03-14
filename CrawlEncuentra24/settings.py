@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import getpass
+username = getpass.getuser()
 
 # Scrapy settings for CrawlEncuentra24 project
 #
@@ -10,6 +12,8 @@
 #     https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 BOT_NAME = 'CrawlEncuentra24'
+
+URLLENGTH_LIMIT = 4000
 
 SPIDER_MODULES = ['CrawlEncuentra24.spiders']
 NEWSPIDER_MODULE = 'CrawlEncuentra24.spiders'
@@ -24,12 +28,19 @@ DOWNLOADER_MIDDLEWARES = {
     'scrapy_splash.SplashCookiesMiddleware': 723,
     'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
+    'CrawlEncuentra24.middlewares.RebootDockerCustomMiddleware': 550,
+    'scrapy.downloadermiddlewares.retry.RetryMiddleware': None
 }
 
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 
+LOG_FILE = '/home/' + username + '/CrawlEncuentra24/scrapy_output.txt'
+
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36'
+
+RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 400, 408, 429]
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'CrawlEncuentra24 (+http://www.yourdomain.com)'
@@ -38,7 +49,7 @@ HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 ROBOTSTXT_OBEY = True
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-#CONCURRENT_REQUESTS = 32
+CONCURRENT_REQUESTS = 1
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://doc.scrapy.org/en/latest/topics/settings.html#download-delay

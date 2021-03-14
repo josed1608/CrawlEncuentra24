@@ -6,7 +6,12 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+from scrapy.downloadermiddlewares.retry import RetryMiddleware
+from scrapy.utils.response import response_status_message
+import logging
+import os
+import time
+import CrawlEncuentra24.constants as constants
 
 class Crawlencuentra24SpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
@@ -101,3 +106,23 @@ class Crawlencuentra24DownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+# CLase de retries customizada para que reinicie la imagen de docker cuando se recibe un código HTTP inesperado
+class RebootDockerCustomMiddleware(RetryMiddleware):
+
+    def process_response(self, request, response, spider):
+        if request.meta.get('dont_retry', False):
+            return response
+        if response.status in self.retry_http_codes:
+            reason = response_status_message(response.status)
+
+            logging.info('Restarting docker image')
+            os.system(constants.stop_docker_command)
+            logging.info('Stopped docker image, restarting...')
+            os.system(constants.start_docker_command)
+            time.sleep(300)
+            logging.info('Finished restarting docker image')
+
+            return self._retry(request, reason, spider) or response
+
+        return response
