@@ -77,7 +77,13 @@ class Ecncuentra24Spider(scrapy.Spider):
         columna_precio = 'precio_dolares' if precio[0] == '$' else 'precio_colones'
         item[columna_precio] = precio
 
-        item['metros_cuadrados'] = response.css('.icon-area~ .info-value::text').extract()
+        item['metros_cuadrados_construccion'] = response.css('.icon-area~ .info-value::text').extract()
+        try:
+            indice_tamano_lote = response.css('.ad-info li .info-name::text').extract().index('Tamaño del lote:') + 1
+            item['metros_cuadrados_lote'] = response.css('.ad-info li:nth-child(' + str(indice_tamano_lote) + ') .info-value::text').extract()
+            print(item['metros_cuadrados_lote'])
+        except:
+            item['metros_cuadrados_lote'] = ''
 
         item['habitaciones'] = response.css('.icon-category-home~ .info-value::text').extract()
 
