@@ -9,7 +9,7 @@ import CrawlEncuentra24.constants as constants
 
 from ..items import Crawlencuentra24Item
 
-class Ecncuentra24Spider(scrapy.Spider):
+class Encuentra24Spider(scrapy.Spider):
     name = 'Encuentra24Spider'
     # Los links contienen los filtros de localización y de tipo de propiedad
     start_urls = [
@@ -25,41 +25,31 @@ class Ecncuentra24Spider(scrapy.Spider):
     reg_ex_pagina = re.compile(r"\.\d+\?")
 
     id_auto_incrementado = 0
-    first_page_venta = True
-    first_page_alquiler = True
 
     def start_requests(self):
         for url in self.start_urls:
             yield SplashRequest(url=url, callback=self.parse, endpoint='execute', args={'lua_source': constants.lua_script_paginar}, meta={'pagina': 1})
 
     def parse(self, response, **kwargs):
-        todos_los_anuncions = response.css('article')
-        link_primer_anuncio = todos_los_anuncions[0].css('.ann-box-title::attr(href)').get()
+        todos_los_anuncios = response.css('.ann-ad-tile__content')
+        link_primer_anuncio = todos_los_anuncios[0].css('.ann-ad-tile__title::attr(href)').get()
         tipo_de_anuncio = 'alquiler' if '/costa-rica-es/bienes-raices-alquiler' in link_primer_anuncio else 'venta'
 
-        for anuncio in todos_los_anuncions:
+        for anuncio in todos_los_anuncios:
             # Para no sobrecargar a Encuentra24
             time.sleep(1)
 
             item_anuncio = Crawlencuentra24Item()
-            link_anuncio = self.BASE_URL + anuncio.css('.ann-box-title::attr(href)').get()
+            link_anuncio = self.BASE_URL + anuncio.css('.ann-ad-tile__title::attr(href)').get()
             item_anuncio['pagina'] = response.meta.get('pagina')
             item_anuncio['link'] = link_anuncio
             item_anuncio['tipo_de_anuncio'] = tipo_de_anuncio
 
             yield Request(url=link_anuncio, callback=self.parse_anuncio, meta={'anuncio':  item_anuncio})
 
-        flechas_sig_pag = response.css('nav li.arrow a::attr(href)')
-        # Hay dos flechas arriba y dos abajo, 4 en total, excepto en la primera y última página que hay solo dos
-        if len(flechas_sig_pag) == 4 \
-                or (tipo_de_anuncio == 'venta' and self.first_page_venta)\
-                or (tipo_de_anuncio == 'alquiler' and self.first_page_alquiler):
-
-            if tipo_de_anuncio == 'venta' and self.first_page_venta:
-                self.first_page_venta = False
-            elif tipo_de_anuncio == 'alquiler' and self.first_page_alquiler:
-                self.first_page_alquiler = False
-
+        flecha_sig_pag = response.css('.arrow-next')
+        #Si hay siguiente pagina, scrapearla
+        if len(flecha_sig_pag) == 1:
             (link_sig_pag, sig_pag) = self.crear_sig_url(response.url)
             self.cooldown_splash(sig_pag)
             yield SplashRequest(url=link_sig_pag, callback=self.parse, endpoint='execute', args={'lua_source': constants.lua_script_paginar}, meta={'pagina': sig_pag})
@@ -81,7 +71,6 @@ class Ecncuentra24Spider(scrapy.Spider):
         try:
             indice_tamano_lote = response.css('.ad-info li .info-name::text').extract().index('Tamaño del lote:') + 1
             item['metros_cuadrados_lote'] = response.css('.ad-info li:nth-child(' + str(indice_tamano_lote) + ') .info-value::text').extract()
-            print(item['metros_cuadrados_lote'])
         except:
             item['metros_cuadrados_lote'] = ''
 
